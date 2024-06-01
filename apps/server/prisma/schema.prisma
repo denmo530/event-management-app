@@ -23,19 +23,19 @@ model User {
   updatedAt DateTime @updatedAt
   events    Event[]
 }
-
-model Type {
-  id        String   @id @default(cuid())
-  name      String
+model EventType {
+  id          String   @id @default(cuid())
+  name        String
   description String?
-  events EventType[]
+  events      Event[]
 }
+
 model Venue {
   id        String   @id @default(cuid())
   name      String?
   location  String
   capacity  Int?
-  events    EventVenue[]
+  events    Event[]
 }
 
 model Sponsor {
@@ -43,7 +43,7 @@ model Sponsor {
   name      String
   logoUrl   String?
   website   String?
-  events    EventSponsor[]
+  events    Event[]
 }
 
 model Attendee {
@@ -51,40 +51,40 @@ model Attendee {
   name       String?
   email      String
   status     String
-  events     EventAttendee[]
+  events     Event[]
 }
 
 model Budget {
-  id        String   @id @default(cuid())
-  item      String
-  amount    Float
-  events    EventBudget[]
+  id     String  @id @default(cuid())
+  item   String
+  amount Float
+  events Event[]
 }
 
 model Analytics {
-  id        String   @id @default(cuid())
-  metricName  String
-  value     Float
-  events    EventAnalytics[]
+  id         String  @id @default(cuid())
+  metricName String
+  value      Float
+  events     Event[]
 }
 
 model ContactInfo {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  phoneNumber     String
-  events    EventContactInfo[]
+  id           String  @id @default(cuid())
+  name         String
+  email        String
+  phoneNumber  String
+  events       Event[]
 }
 
 model CustomField {
-  id        String   @id @default(cuid())
-  name      String
-  type      String
-  events    EventCustomField[]
+  id     String  @id @default(cuid())
+  name   String
+  type   String
+  events Event[]
 }
 
 model Event {
-  id              String               @id @default(cuid())
+  id              String           @id @default(cuid())
   name            String
   description     String?
   startDate       DateTime
@@ -92,77 +92,15 @@ model Event {
   location        String
   organizer       User              @relation(fields: [organizerId], references: [id])
   organizerId     String
-  eventTypes      EventType[]
-  venues          EventVenue[]
-  sponsors        EventSponsor[]
-  attendees       EventAttendee[]
-  contactInfo     EventContactInfo[]
-  budgets         EventBudget[]
-  analytics       EventAnalytics[]
-  customFields    EventCustomField[]
-}
-
-model EventType {
-  event   Event   @relation(fields: [eventId], references: [id])
-  eventId String
-  type Type @relation(fields: [eventTypeId], references: [id])
-  eventTypeId String
-  @@id([eventId, eventTypeId])
-
-}
-
-model EventVenue {
-  event   Event   @relation(fields: [eventId], references: [id])
-  eventId String
-  venue   Venue   @relation(fields: [venueId], references: [id])
-  venueId String
-  @@id([eventId, venueId])
-}
-
-model EventSponsor {
-  event   Event   @relation(fields: [eventId], references: [id])
-  eventId String
-  sponsor Sponsor  @relation(fields: [sponsorId], references: [id])
-  sponsorId String
-  @@id([eventId, sponsorId])
-}
-
-model EventAttendee {
-  event    Event   @relation(fields: [eventId], references: [id])
-  eventId  String
-  attendee Attendee @relation(fields: [attendeeId], references: [id])
-  attendeeId String
-  @@id([eventId, attendeeId])
-}
-
-model EventBudget {
-  event   Event   @relation(fields: [eventId], references: [id])
-  eventId String
-  budget  Budget  @relation(fields: [budgetId], references: [id])
-  budgetId String
-  @@id([eventId, budgetId])
-}
-
-model EventAnalytics {
-  event   Event   @relation(fields: [eventId], references: [id])
-  eventId String
-  analytics Analytics @relation(fields: [analyticsId], references: [id])
-  analyticsId String
-  @@id([eventId, analyticsId])
-}
-
-model EventContactInfo {
-  event   Event   @relation(fields: [eventId], references: [id])
-  eventId String
-  contactInfo ContactInfo @relation(fields: [contactInfoId], references: [id])
-  contactInfoId String
-  @@id([eventId, contactInfoId])
-}
-
-model EventCustomField {
-  event   Event   @relation(fields: [eventId], references: [id])
-  eventId String
-  customField CustomField @relation(fields: [customFieldId], references: [id])
-  customFieldId String
-  @@id([eventId, customFieldId])
+  eventTypeId     String
+  eventType       EventType         @relation(fields: [eventTypeId], references: [id])
+  venueId         String?
+  venue           Venue?             @relation(fields: [venueId], references: [id])
+  sponsors        Sponsor[]
+  attendees       Attendee[]
+  contactInfoId   String?
+  contactInfo     ContactInfo?       @relation(fields: [contactInfoId], references: [id])
+  budgets         Budget[]
+  analytics       Analytics[]
+  customFields    CustomField[]
 }
