@@ -1,12 +1,17 @@
-import { IsString, IsEmail } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsArray } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
-  name: string;
+  externalId: string; // This is the ID from Clerk
+
+  @IsString()
+  @IsOptional()
+  name?: string; // Name might be optional
 
   @IsEmail()
   email: string;
 
-  @IsString()
-  password: string;
+  @IsArray()
+  @IsOptional()
+  orgIds?: string[]; // Array of organization IDs, if any
 }

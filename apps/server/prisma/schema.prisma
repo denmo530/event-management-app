@@ -17,7 +17,8 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
-  password  String
+  orgIds    String[] @default([])
+  externalId String?  @unique // This is the clerkId
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   events    Event[]

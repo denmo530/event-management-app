@@ -1,34 +1,71 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '@server/prisma/prisma.service';
 import { CreateUserDto } from './dto/user.dto';
-import { hash } from 'bcrypt';
-
-const SALT_ROUNDS = 10;
 
 @Injectable()
 export class UserService {
   constructor(private prismaService: PrismaService) {}
 
-  async create(dto: CreateUserDto) {
+  async upsertUser(createUserDto: CreateUserDto): Promise<void> {
+    try {
+      await this.prismaService.user.upsert({
+        where: {
+          externalId: createUserDto.externalId,
+        },
+        update: {
+          name: createUserDto.name,
+          email: createUserDto.email,
+          orgIds: createUserDto.orgIds,
+        },
+        create: {
+          externalId: createUserDto.externalId,
+          name: createUserDto.name,
+          email: createUserDto.email,
+          orgIds: createUserDto.orgIds ?? [],
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to upsert user');
+    }
+  }
+
+  async deleteUser(externalId: string): Promise<void> {
+    try {
+      await this.prismaService.user.delete({
+        where: {
+          externalId,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to delete user');
+    }
+  }
+
+  async addOrgIdToUser(externalId: string, orgId: string): Promise<void> {
     const user = await this.prismaService.user.findUnique({
       where: {
-        email: dto.email,
+        externalId,
       },
     });
 
-    if (user)
-      throw new ConflictException('User already exists with this email');
+    if (!user) throw new NotFoundException('User not found');
 
-    const newUser = await this.prismaService.user.create({
-      data: {
-        ...dto,
-        password: await hash(dto.password, SALT_ROUNDS),
-      },
-    });
-
-    const { password, ...result } = newUser;
-
-    return result;
+    try {
+      await this.prismaService.user.update({
+        where: {
+          externalId,
+        },
+        data: {
+          orgIds: [...user.orgIds, orgId],
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to add org id to user');
+    }
   }
 
   async findByEmail(email: string) {
