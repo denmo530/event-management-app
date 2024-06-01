@@ -1,32 +1,45 @@
-import { EventType } from './../../../../node_modules/.pnpm/@prisma+client@5.14.0_prisma@5.14.0/node_modules/.prisma/client/index.d';
-import { Injectable } from '@nestjs/common';
+import { EventType } from '@prisma/client';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { EventTypeRepository } from './event-type.repository';
 import { CreateEventTypeDto, UpdateEventTypeDto } from './dto/event-type.dto';
+import { validate } from 'class-validator';
 
 @Injectable()
 export class EventTypeService {
   constructor(private readonly eventTypeRepository: EventTypeRepository) {}
 
-  create(dto: CreateEventTypeDto): Promise<EventType> {
+  async create(dto: CreateEventTypeDto): Promise<EventType> {
+    const errors = await validate(dto);
+    if (errors.length > 0) {
+      throw new BadRequestException(errors.toString());
+    }
     return this.eventTypeRepository.create(dto);
   }
 
-  findMany(): Promise<EventType[]> {
+  async findMany(): Promise<EventType[]> {
     return this.eventTypeRepository.findMany();
   }
 
-  findOne(eventId: string, eventTypeId: string): Promise<EventType | null> {
+  async findOne(
+    eventId: string,
+    eventTypeId: string,
+  ): Promise<EventType | null> {
     return this.eventTypeRepository.findOne(eventId, eventTypeId);
   }
 
-  update(dto: UpdateEventTypeDto): Promise<EventType> {
+  async update(dto: UpdateEventTypeDto): Promise<EventType> {
+    const errors = await validate(dto);
+    if (errors.length > 0) {
+      throw new BadRequestException(errors.toString());
+    }
+
     return this.eventTypeRepository.update(dto.eventId, dto.eventTypeId, {
       eventId: dto.newEventId,
       eventTypeId: dto.newEventTypeId,
     });
   }
 
-  delete(eventId: string, eventTypeId: string): Promise<EventType> {
+  async delete(eventId: string, eventTypeId: string): Promise<EventType> {
     return this.eventTypeRepository.delete(eventId, eventTypeId);
   }
 }
